@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import subprocess
+
+parser = argparse.ArgumentParser(
+    prog='PROG',
+    description='Builds this project',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+
+parser.add_argument(
+    '--ui', action='store_true',
+    help='Builds UI Vue App')
+
+parser.add_argument(
+    '--upload', action='store_true',
+    help='Whether to upload files')
+
+parser.add_argument(
+    '--full', action='store_true',
+    help='Whether make full build process')
+
+parser.add_argument(
+    '--host', type=str, default='dev.host',
+    help="Remote host like 'username@hostname'"
+)
+parser.add_argument(
+    '--remote', type=str, default='/var/www/',
+    help="Remote location like '/path/to/project'"
+)
+parser.add_argument(
+    '--port', type=str, default='52222',
+    help="Host port"
+)
+parser.add_argument(
+    '--rsa', type=str, default=os.environ.get('RSA_KEY_LOCATION'),
+    help="SSH key path"
+)
+
+args = parser.parse_args()
+
+if args.full:
+    args.ui         = True
+    args.upload     = True
+
+if args.ui:
+    subprocess.run(["rm", "-rf", "app/static"])
+    subprocess.run(["npm", "run-script", "build"], cwd="ui")
+
+if args.upload:
+    f = open('./upload', 'w')
+    f.write('#!/bin/bash\nrsync -av --delete-after --exclude="upload" --exclude="env" --exclude="node_modules" --exclude="ui/" --exclude="__pycache__" --chmod u+rwx -e "ssh -p %s -i %s" "%s/" %s:%s\n' % (args.port, args.rsa, os.getcwd(), args.host, args.remote))
+    f.close()
+
+    subprocess.run(['chmod', '+x', './upload'])
+    subprocess.run('./upload', shell=True)
+
+    os.remove('./upload')
