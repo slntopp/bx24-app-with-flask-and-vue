@@ -43,6 +43,8 @@ def install():
                     - /ui/public/install_finish.html
         """
         return render_template('install_finish.html')
+    except:
+        return '', 200
 
 # Hook example
 @app.route('/hook', methods=['POST', 'GET'])
