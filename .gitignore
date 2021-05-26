@@ -129,3 +129,5 @@ dmypy.json
 
 .vscode
 node_modules
+app/public
+app/static
