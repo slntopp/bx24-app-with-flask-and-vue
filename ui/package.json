@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "core-js": "^3.6.4",
+    "dns-packet": "^5.2.4",
+    "postcss": "^8.3.0",
     "vue": "^2.6.11",
     "vue-i18n": "^8.0.0"
   },
